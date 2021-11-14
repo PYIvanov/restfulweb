@@ -14,7 +14,7 @@ class m211113_152357_create_status_table extends Migration
     {
         $this->createTable('{{%status}}', [
             'id'    => $this->primaryKey(),
-            'name'  => $this->char(10)->comment('Статус задачи: "Новая", "В работе", "Выполнена", "Ошибка'),
+            'name'  => $this->char(10)->comment('Статус задачи: "Новая", "В работе", "Выполнена", "Ошибка"'),
         ]);
 
         $this->createIndex(
