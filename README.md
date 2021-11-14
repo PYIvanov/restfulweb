@@ -73,7 +73,7 @@ Content-Type: application/json
 }
 ```
 
-Закрытие задачи с id=3:
+Закрытие задачи:
 ```http request
 ### close ###
 POST http://restfulweb.test:80/tasks/close
@@ -84,5 +84,19 @@ Content-Type: application/json
 {
   "id": "3",
   "result": "Результат выполнения задачи №3"
+}
+```
+
+Закрытие задачи с ошибкой:
+```http request
+### close ###
+POST http://restfulweb.test:80/tasks/close
+Accept: application/json
+Authorization: Bearer 102-token
+Content-Type: application/json
+
+{
+  "id": "3",
+  "result": "ERROR: Результат выполнения задачи №3"
 }
 ```
