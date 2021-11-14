@@ -60,7 +60,7 @@ Accept: application/json
 Authorization: Bearer 102-token
 ```
 
-Просмотра всех задач с постраничным выводом и применением фильтра по статусу (опционально):
+Просмотр всех задач с постраничным выводом и применением фильтра по статусу (опционально):
 ```http request
 ### view all tasks ###
 GET http://restfulweb.test:80/tasks?page=0
