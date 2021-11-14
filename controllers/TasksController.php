@@ -2,7 +2,15 @@
 
 namespace app\controllers;
 
+use app\models\Tasks;
+use PHPUnit\Util\Log\JSON;
+use yii\base\Event;
+use yii\data\ActiveDataProvider;
+use yii\db\ActiveQuery;
+use yii\filters\AccessControl;
 use yii\filters\ContentNegotiator;
+use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
 use yii\rest\ActiveController;
 use yii\web\ForbiddenHttpException;
 use yii\web\Response;
@@ -28,7 +36,7 @@ class TasksController extends ActiveController
         ];
 
         $behaviors['access'] = [
-            'class' => \yii\filters\AccessControl::className(),
+            'class' => AccessControl::className(),
             'only' => ['create', 'update', 'delete', 'view', 'close'],
             'rules' => [
                 [
@@ -40,7 +48,7 @@ class TasksController extends ActiveController
         ];
 
         $behaviors['verbs'] = [
-            'class' => \yii\filters\VerbFilter::class,
+            'class' => VerbFilter::class,
             'actions' => [
                 'close'  => ['POST']
             ],
@@ -55,9 +63,7 @@ class TasksController extends ActiveController
         // выбрасываем исключение ForbiddenHttpException если доступ запрещен
         if ($action === 'delete') {
             if (($model->creator_id !== (int)\Yii::$app->user->id) || ($model->status_id !== 1)) {
-                throw new ForbiddenHttpException((int)($model->status_id !== '1')
-                    ."{$model->creator_id} {$model->status_id} Вы можете удалять только собственные задачи!"
-                    .\Yii::$app->user->id);
+                throw new ForbiddenHttpException("Вы можете удалять только собственные задачи!");
             }
         } elseif ($action === 'update') {
             if ($model->creator_id !== (int)\Yii::$app->user->id)
@@ -69,16 +75,76 @@ class TasksController extends ActiveController
     {
         $actions = parent::actions();
         unset($actions['view']);
+        unset($actions['index']);
         return $actions;
     }
 
-    public function actionView()
+    public function actionIndex()
     {
-        return \Yii::$app->request->get();
+        Event::on(Tasks::class, Tasks::EVENT_AFTER_FIND, function ($event) {
+            $event->sender->scenario = Tasks::SCENARIO_SEARCH_MULTIPLE;
+        });
+
+        if(!empty(\Yii::$app->request->post('status'))) {
+            $query = Tasks::find()
+                ->joinWith('status')
+                ->where(['status.name' => \Yii::$app->request->post('status')]);
+        } else {
+            $query = Tasks::find();
+        }
+        return new ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 3,
+            ],
+        ]);
     }
 
+    /**
+     * @throws \Exception
+     */
+    public function actionView()
+    {
+        Event::on(Tasks::class, Tasks::EVENT_AFTER_FIND, function ($event) {
+            $event->sender->scenario = Tasks::SCENARIO_SEARCH_ONE;
+        });
+
+        $task = Tasks::findOne(\Yii::$app->request->get('id'));
+        if ($task !== null) {
+            $task->status_id = '2';
+            if (!$task->save()) {
+                throw new \Exception (implode("<br />" , ArrayHelper::getColumn($task->errors , 0 , false)));
+            }
+        }
+
+        return $task;
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function actionClose()
     {
-        return [];
+        Event::on(Tasks::class, Tasks::EVENT_BEFORE_VALIDATE, function ($event) {
+            $event->sender->scenario = Tasks::SCENARIO_CLOSE;
+        });
+
+        $task = Tasks::findOne(\Yii::$app->request->post('id'));
+        $message = [];
+        if ($task !== null) {
+            if (strpos(\Yii::$app->request->post('result'), 'ERROR: ') === false)
+            {
+                $task->status_id = '3'; // Set status code 'Выполнена'
+                $task->result = \Yii::$app->request->post('result'); // Set status code 'Выполнена'
+            } else {
+                $task->status_id = '4'; // Set status code 'Ошибка'
+                $message = ['message' => 'Результат содержит ошибку', 'result' => \Yii::$app->request->post('result')];
+            }
+
+            if (!$task->save()) {
+                throw new \Exception (implode("<br />", ArrayHelper::getColumn($task->errors, 0, false)));
+            }
+        }
+        return $message;
     }
 }
