@@ -44,7 +44,7 @@ Content-Type: application/json
 }
 ```
 
-Удаление новой задачи:
+Удаление задачи:
 ```http request
 ### delete ###
 DELETE http://restfulweb.test:80/tasks/15
