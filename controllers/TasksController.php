@@ -135,9 +135,10 @@ class TasksController extends ActiveController
             if (strpos(\Yii::$app->request->post('result'), 'ERROR: ') === false)
             {
                 $task->status_id = '3'; // Set status code 'Выполнена'
-                $task->result = \Yii::$app->request->post('result'); // Set status code 'Выполнена'
+                $task->result = \Yii::$app->request->post('result');
             } else {
                 $task->status_id = '4'; // Set status code 'Ошибка'
+                $task->result = \Yii::$app->request->post('result');
                 $message = ['message' => 'Результат содержит ошибку', 'result' => \Yii::$app->request->post('result')];
             }
 
