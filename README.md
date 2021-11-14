@@ -31,7 +31,7 @@
     php yii migrate/up
 
 #### Примеры HTTP запросов 
-Cоздание новой задачи:
+Создание новой задачи:
 ```http request
 ### create ###
 POST http://restfulweb.test:80/tasks/create
@@ -44,7 +44,7 @@ Content-Type: application/json
 }
 ```
 
-Удаление новой задачи c id=15:
+Удаление новой задачи:
 ```http request
 ### delete ###
 DELETE http://restfulweb.test:80/tasks/15
@@ -52,7 +52,7 @@ Accept: application/json
 Authorization: Bearer 102-token
 ```
 
-Просмотр задачи с id=2:
+Просмотр задачи:
 ```http request
 ### view one task with id=2 ###
 GET http://restfulweb.test:80/tasks/2
@@ -73,7 +73,7 @@ Content-Type: application/json
 }
 ```
 
-Закрытие задачи с id=3:
+Закрытие задачи:
 ```http request
 ### close ###
 POST http://restfulweb.test:80/tasks/close
@@ -84,5 +84,19 @@ Content-Type: application/json
 {
   "id": "3",
   "result": "Результат выполнения задачи №3"
+}
+```
+
+Закрытие задачи с ошибкой:
+```http request
+### close ###
+POST http://restfulweb.test:80/tasks/close
+Accept: application/json
+Authorization: Bearer 102-token
+Content-Type: application/json
+
+{
+  "id": "3",
+  "result": "ERROR: Результат выполнения задачи №3"
 }
 ```
