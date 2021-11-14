@@ -63,7 +63,7 @@ class TasksController extends ActiveController
         // выбрасываем исключение ForbiddenHttpException если доступ запрещен
         if ($action === 'delete') {
             if (($model->creator_id !== (int)\Yii::$app->user->id) || ($model->status_id !== 1)) {
-                throw new ForbiddenHttpException("Вы можете удалять только собственные задачи!");
+                throw new ForbiddenHttpException("Вы можете удалять только собственные задачи в статусе `Новая`!");
             }
         } elseif ($action === 'update') {
             if ($model->creator_id !== (int)\Yii::$app->user->id)
@@ -136,10 +136,19 @@ class TasksController extends ActiveController
             {
                 $task->status_id = '3'; // Set status code 'Выполнена'
                 $task->result = \Yii::$app->request->post('result');
+                $message = [
+                    'message' => 'Статус задачи изменён на `Выполнена`',
+                    'status_id' => $task->status_id,
+                    'result' => \Yii::$app->request->post('result')
+                ];
             } else {
                 $task->status_id = '4'; // Set status code 'Ошибка'
                 $task->result = \Yii::$app->request->post('result');
-                $message = ['message' => 'Результат содержит ошибку', 'result' => \Yii::$app->request->post('result')];
+                $message = [
+                    'message' => 'Статус задачи изменён на `Ошибка`',
+                    'status_id' => $task->status_id,
+                    'result' => \Yii::$app->request->post('result')
+                ];
             }
 
             if (!$task->save()) {

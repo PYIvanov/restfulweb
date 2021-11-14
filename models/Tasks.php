@@ -45,7 +45,7 @@ class Tasks extends \yii\db\ActiveRecord
             ['name', 'required'],
             ['status_id', 'default', 'value' => '1'],
             ['creator_id', 'default', 'value' => Yii::$app->user->id],
-            [['status_id'], 'exist', 'skipOnError' => true, 'targetClass' => Status::className(), 'targetAttribute' => ['status_id' => 'id']],
+            [['status_id'], 'exist', 'skipOnError' => false, 'targetClass' => Status::className(), 'targetAttribute' => ['status_id' => 'id']],
             [['name'], 'string', 'max' => 256],
             [['name'], 'unique'],
             [['result'], 'string'],
